@@ -1,0 +1,10 @@
+.program seven_segment
+
+/*
+    Dumps input (7 segments and 7 common) to 14 consecutive pins
+    reads data in 16 bit increments. Should be executed quite slowly
+
+    the number of bits to move each instruction changes with different configurations
+    and is updated by the c code
+*/
+out pins, 1 [31]
