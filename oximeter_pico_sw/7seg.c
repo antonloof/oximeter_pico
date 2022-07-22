@@ -29,6 +29,11 @@ void seg7_init(seg7_state *state)
     seg7_init_dma_buf(state->writing);
     seg7_init_pio(state);
 
+    for (int i = 0; i < state->dig_count + state->seg_count; i++)
+    {
+        gpio_set_drive_strength(state->start_pin + i, GPIO_DRIVE_STRENGTH_12MA);
+    }
+
     state->irq(); // start it all
 }
 
@@ -45,16 +50,18 @@ uint32_t update_bit_order(uint32_t in, uint32_t *from_to, uint32_t len)
 
 void seg7_display(uint score, uint leading_zero, seg7_state *state)
 {
-    uint32_t clear_segments_mask = ((1 << (state->dig_count + 1)) - 1) << state->seg_count;
-    for (int i = 0; i < DISPLAY_COUNT_MAX; i++)
+    for (int i = 0; i < state->dig_count; i++)
     {
-        state->writing[state->dig_i_to_display_i[i]] &= clear_segments_mask; // clear segments
+        state->writing[i] = 1 << i;
         if (score || !i || leading_zero)
         {
-            uint32_t segments = dig_to_segments[score % 10];
-            state->writing[state->dig_i_to_display_i[i]] |= update_bit_order(segments, state->seg_order, SEGMENT_COUNT_MAX);
+            state->writing[i] |= dig_to_segments[score % 10] << state->dig_count;
         }
         score /= 10;
+    }
+    for (int i = 0; i < state->dig_count; i++)
+    {
+        update_bit_order(state->writing[i], state->pin_order, state->dig_count + state->seg_count);
     }
     state->swap_buffers = 1;
 }
@@ -68,7 +75,7 @@ void seg7_init_pio(seg7_state *state)
     };
     struct pio_program seven_segment_program = {
         .instructions = seven_segment_program_instructions,
-        .length = 2,
+        .length = 1,
         .origin = -1,
     };
 

@@ -12,10 +12,12 @@
 
 typedef struct seg7_state
 {
-    uint32_t dig_i_to_display_i[DISPLAY_COUNT_MAX]; // digit i is connected dig_order[i] pins after the first digit
-    uint32_t seg_order[SEGMENT_COUNT_MAX];          // segment i (a-g+dot) is connected seg_order[i] pins after the first segment
-    uint32_t seg_count;                             // 8 if decimal point is connected else 7
-    uint32_t dig_count;                             // number of digits connected max is 32-seg_count
+
+    uint32_t pin_order[32]; // pin start_pin + i is connected to function start_pin + i
+    // the first dig_count functions are connected to the common pins for the digits the latter seg_count are connected to segment g-a + decimal point
+    // .pin_order = {d0, d1, d2, d3 .., g,f,e,d,c,b,a,dp} replace letters with offsets from pin start_pin
+    uint32_t seg_count; // 8 if decimal point is connected else 7
+    uint32_t dig_count; // number of digits connected max is 32-seg_count
     uint32_t start_pin;
 
     uint32_t buf_1[DISPLAY_COUNT_MAX], buf_2[DISPLAY_COUNT_MAX];
