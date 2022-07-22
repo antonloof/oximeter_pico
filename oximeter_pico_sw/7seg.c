@@ -61,7 +61,7 @@ void seg7_display(uint score, uint leading_zero, seg7_state *state)
     }
     for (int i = 0; i < state->dig_count; i++)
     {
-        update_bit_order(state->writing[i], state->pin_order, state->dig_count + state->seg_count);
+        state->writing[i] = update_bit_order(state->writing[i], state->pin_order, state->dig_count + state->seg_count);
     }
     state->swap_buffers = 1;
 }

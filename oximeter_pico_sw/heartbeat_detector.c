@@ -44,7 +44,7 @@ void heartbeat_detector_sample(float sample, heartbeat_detector *hb)
                     hb->highest_peak = -INFINITY;
                     hb->lowest_valley_before = INFINITY;
                     hb->has_peak = false;
-                    uint32_t peak_period = hb->last_peak_i - hb->highest_peak_i;
+                    uint32_t peak_period = hb->highest_peak_i - hb->last_peak_i;
                     hb->last_peak_i = hb->highest_peak_i;
                     for (int i = 1; i < HEARTBEAT_PERIOD_LEN; i++)
                     {

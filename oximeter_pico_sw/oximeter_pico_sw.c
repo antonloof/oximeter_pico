@@ -11,15 +11,15 @@
 
 #define PHOTODIODE_PIN 28
 #define DISPLAY_BASE_PIN 11
-#define RED_LED_PIN 7
+#define RED_LED_PIN 8
 #define GREEN_LED_PIN 9
-#define IR_LED_PIN 8
+#define IR_LED_PIN 7
 void seven_seg_irq();
 
 seg7_state seven_seg = {
     .dig_count = 4,
     .seg_count = 8,
-    .pin_order = {0, 1, 2, 3, 7, 10, 9, 8, 6, 5, 4, 6},
+    .pin_order = {3, 2, 1, 0, 8, 11, 10, 9, 7, 5, 4, 6},
     .pio = pio0,
     .start_pin = DISPLAY_BASE_PIN,
     .irq = &seven_seg_irq};
@@ -55,10 +55,11 @@ heartbeat_detector hb = {
 
 int main()
 {
+    stdio_init_all();
     init_sampling(PHOTODIODE_PIN);
     seg7_init(&seven_seg);
-    seg7_display(1234, false, &seven_seg);
     // enable the ir led for now, we need to use all leds to measure oxygen content of the blood
+    gpio_set_drive_strength(RED_LED_PIN, GPIO_DRIVE_STRENGTH_12MA);
     gpio_init(IR_LED_PIN);
     gpio_set_dir(IR_LED_PIN, true);
     gpio_put(IR_LED_PIN, 1);
@@ -69,7 +70,7 @@ int main()
     {
         if (should_sample)
         {
-            process_sample(adc_read());
+            process_sample((float)adc_read());
         }
     }
 
@@ -94,10 +95,13 @@ bool repeating_timer_callback(struct repeating_timer *t)
 void process_sample(float sample)
 {
     float filtered = filter_process((float)sample, &input_filter);
+    printf("%f %f\n", filtered, sample);
     heartbeat_detector_sample(filtered, &hb);
+    should_sample = false;
 }
 
 void new_heartrate_callback(uint32_t *periods)
 {
+
     seg7_display((uint)round(SAMPLE_RATE_HZ / (float)periods[0] * HZ_TO_BPM), false, &seven_seg);
 }
