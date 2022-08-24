@@ -9,11 +9,15 @@
 #define SAMPLE_RATE_HZ 1000.0f
 #define HZ_TO_BPM 60.0f
 
-#define PHOTODIODE_PIN 28
+#define PHOTODIODE_IR_PIN 28
+#define PHOTODIODE_BB_PIN 27
+
 #define DISPLAY_BASE_PIN 11
+
 #define RED_LED_PIN 8
 #define GREEN_LED_PIN 9
 #define IR_LED_PIN 7
+
 void seven_seg_irq();
 
 seg7_state seven_seg = {
@@ -56,13 +60,14 @@ heartbeat_detector hb = {
 int main()
 {
     stdio_init_all();
-    init_sampling(PHOTODIODE_PIN);
+    init_sampling(PHOTODIODE_BB_PIN);
     seg7_init(&seven_seg);
     // enable the ir led for now, we need to use all leds to measure oxygen content of the blood
-    gpio_set_drive_strength(RED_LED_PIN, GPIO_DRIVE_STRENGTH_12MA);
-    gpio_init(IR_LED_PIN);
-    gpio_set_dir(IR_LED_PIN, true);
-    gpio_put(IR_LED_PIN, 1);
+    // pulse oximetry is left as an exercise to the reader
+    gpio_set_drive_strength(GREEN_LED_PIN, GPIO_DRIVE_STRENGTH_12MA);
+    gpio_init(GREEN_LED_PIN);
+    gpio_set_dir(GREEN_LED_PIN, true);
+    gpio_put(GREEN_LED_PIN, 1);
 
     add_repeating_timer_ms(-1, repeating_timer_callback, NULL, &timer);
 
